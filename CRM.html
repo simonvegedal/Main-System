@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Marketing CRM</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-auth-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-firestore-compat.min.js"></script>
+    <link rel="stylesheet" href="CRM.css">
+</head>
+<body>
+    <!-- Main Dashboard -->
+    <div id="dashboard">
+        <div class="container">
+            <div class="card">
+                <div class="header">
+                    <div class="logo">📧 Email Marketing CRM</div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalCompanies">0</div>
+                        <div class="stat-label">Virksomheder</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="contactedCount">0</div>
+                        <div class="stat-label">Kontaktet</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="repliedCount">0</div>
+                        <div class="stat-label">Svar modtaget</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="interestedCount">0</div>
+                        <div class="stat-label">Interesseret</div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Virksomheder</h2>
+                    <button onclick="showAddModal()" class="btn">+ Tilføj virksomhed</button>
+                </div>
+
+                 <!-- Search and Filter -->
+                <div class="search-filter">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Søg virksomheder..." onkeyup="filterCompanies()">
+                    <select id="statusFilter" class="form-control" onchange="filterCompanies()">
+                        <option value="">Alle status</option>
+                        <option value="not-contacted">Ikke kontaktet</option>
+                        <option value="contacted">Kontaktet</option>
+                        <option value="replied">Svar modtaget</option>
+                        <option value="interested">Interesseret</option>
+                        <option value="closed">Lukket</option>
+                    </select>
+                    <select id="emailConsentFilter" class="form-control" onchange="filterCompanies()">
+                        <option value="">Alle email tilladelser</option>
+                        <option value="yes">Vil modtage emails</option>
+                        <option value="no">Vil ikke modtage emails</option>
+                        <option value="unknown">Ukendt</option>
+                    </select>
+                </div>
+
+                <!-- Companies Table -->
+                <table class="table" id="companiesTable">
+                    <thead>
+                        <tr>
+                            <th>Virksomhed</th>
+                            <th>CVR</th>
+                            <th>Kontaktperson</th>
+                            <th>Email</th>
+                            <th>Telefon</th>
+                            <th>Status</th>
+                            <th>Email tilladelse</th>
+                            <th>Sidst opdateret</th>
+                            <th>Handlinger</th>
+                        </tr>
+                    </thead>
+                    <tbody id="companiesTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Company Modal -->
+    <div id="companyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Tilføj virksomhed</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="companyForm">
+                <div class="form-group">
+                    <label>Virksomhedsnavn *</label>
+                    <input type="text" id="companyName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>CVR-nummer</label>
+                    <input type="text" id="cvrNumber" class="form-control" pattern="[0-9]{8}" placeholder="12345678" title="CVR skal være 8 cifre">
+                </div>
+                <div class="form-group">
+                    <label>Kontaktperson</label>
+                    <input type="text" id="contactPerson" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="contactEmail" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefon</label>
+                    <input type="tel" id="contactPhone" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Website</label>
+                    <input type="url" id="website" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Branche</label>
+                    <input type="text" id="industry" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="status" class="form-control">
+                        <option value="not-contacted">Ikke kontaktet</option>
+                        <option value="contacted">Kontaktet</option>
+                        <option value="replied">Svar modtaget</option>
+                        <option value="interested">Interesseret</option>
+                        <option value="closed">Lukket</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Vil modtage fremtidige emails?</label>
+                    <select id="emailConsent" class="form-control">
+                        <option value="unknown">Ukendt</option>
+                        <option value="yes">Ja - Vil gerne modtage emails</option>
+                        <option value="no">Nej - Vil ikke modtage emails</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Noter</label>
+                    <textarea id="notes" class="form-control" rows="3"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" onclick="closeModal()" class="btn btn-secondary">Annuller</button>
+                    <button type="submit" class="btn">Gem</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

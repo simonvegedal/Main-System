@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevFirm Infrastructure System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">Infrastructure System
+            </div>
+            <div class="user-info" id="userInfo" style="display: none;">
+                <span id="welcomeText">Welcome, Admin</span>
+                <span id="firebaseStatus" class="status-message" style="display: none;"></span>
+                <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Firebase Configuration -->
+        <div class="firebase-config" id="firebaseConfig">
+            <h2>Firebase Configuration</h2>
+            <p>Enter your Firebase project configuration to enable data persistence:</p>
+            <form class="config-form" onsubmit="initializeFirebase(event)">
+                <input type="text" id="apiKey" placeholder="API Key" required>
+                <input type="text" id="authDomain" placeholder="Auth Domain" required>
+                <input type="text" id="projectId" placeholder="Project ID" required>
+                <input type="text" id="storageBucket" placeholder="Storage Bucket" required>
+                <input type="text" id="messagingSenderId" placeholder="Messaging Sender ID" required>
+                <input type="text" id="appId" placeholder="App ID" required>
+                <button type="submit" class="btn btn-primary full-width">Initialize Firebase</button>
+            </form>
+            <div class="status-message status-error" style="display: none;" id="configError"></div>
+        </div>
+
+        <!-- Login Section -->
+        <div class="login-section hidden" id="loginSection">
+            <h2>System Login</h2>
+            <form class="login-form" onsubmit="login(event)">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content hidden" id="mainContent">
+            <!-- Calendar Section -->
+            <div class="section">
+                <h2>📅 Calendar</h2>
+                <div id="currentMonth"></div>
+                <table class="calendar" id="calendar">
+                    <thead>
+                        <tr>
+                            <th>Sun</th>
+                            <th>Mon</th>
+                            <th>Tue</th>
+                            <th>Wed</th>
+                            <th>Thu</th>
+                            <th>Fri</th>
+                            <th>Sat</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calendarBody">
+                    </tbody>
+                </table>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-secondary" onclick="previousMonth()">← Previous</button>
+                    <button class="btn btn-secondary" onclick="nextMonth()">Next →</button>
+                </div>
+                <p style="margin-top: 15px; color: #666; font-style: italic;">Click on any day to view or add events</p>
+            </div>
+
+            <!-- Employee Management Section -->
+            <div class="section">
+                <h2>👥 Employee Management</h2>
+                <form class="employee-form" onsubmit="addEmployee(event)">
+                    <input type="text" id="empName" placeholder="Full Name" required>
+                    <input type="email" id="empEmail" placeholder="Email" required>
+                    <input type="tel" id="empPhone" placeholder="Phone">
+                    <select id="empRole" required>
+                        <option value="">Select Role</option>
+                        <option value="Backend Developer">Backend Developer</option>
+                        <option value="Frontend Developer">Frontend Developer</option>
+                        <option value="Full Stack Developer">Full Stack Developer</option>
+                        <option value="CEO">CEO</option>
+                        <option value="CMO">CMO</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary full-width">Add Employee</button>
+                </form>
+
+                <div class="employee-list" id="employeeList">
+                    <!-- Employees will be dynamically loaded from Firebase -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="navigation-buttons hidden" id="navigationButtons">
+            <a href="MAIL_SYSTEM.html" class="nav-button">
+                <div class="nav-icon">📧</div>
+                <div class="nav-title">Mail System</div>
+                <div class="nav-description">Manage internal communications and email workflows</div>
+            </a>
+           
+            <a href="CRM.html" class="nav-button">
+                <div class="nav-icon">👤</div>
+                <div class="nav-title">Client Contact System</div>
+                <div class="nav-description">Manage client relationships and contact information</div>
+            </a>
+        </div>
+
+        <!-- Event Modal -->
+        <div class="event-modal hidden" id="eventModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add Calendar Event</h3>
+                    <button class="close-btn" onclick="hideEventModal()">&times;</button>
+                </div>
+                <form class="event-form" onsubmit="addEvent(event)">
+                    <input type="text" id="eventTitle" placeholder="Event Title" required>
+                    <input type="date" id="eventDate" required>
+                    
+                    <div class="custom-time-input">
+                        <select id="event-time-hour" class="time-select">
+                            <option value="">--</option>
+                            <option value="00">00</option>
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="17">17</option>
+                            <option value="18">18</option>
+                            <option value="19">19</option>
+                            <option value="20">20</option>
+                            <option value="21">21</option>
+                            <option value="22">22</option>
+                            <option value="23">23</option>
+                        </select>
+                        <span class="time-separator">:</span>
+                        <select id="event-time-minute" class="time-select">
+                            <option value="">--</option>
+                            <option value="00">00</option>
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                            <option value="45">45</option>
+                        </select>
+                        <input type="hidden" id="eventTime" name="eventTime">
+                    </div>
+                    
+                    <textarea id="eventDescription" placeholder="Event Description"></textarea>
+                    <button type="submit" class="btn btn-primary">Add Event</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Day View Modal -->
+        <div class="day-modal hidden" id="dayModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="dayModalTitle">Events for</h3>
+                    <button class="close-btn" onclick="hideDayModal()">&times;</button>
+                </div>
+                <div id="dayModalContent">
+                    <!-- Day events will be displayed here -->
+                </div>
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="addEventForDay()">Add Event for This Day</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Event Modal -->
+        <div class="edit-event-modal hidden" id="editEventModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Edit Event</h3>
+                    <button class="close-btn" onclick="hideEditEventModal()">&times;</button>
+                </div>
+                <form class="edit-event-form" onsubmit="updateEvent(event)">
+                    <input type="hidden" id="editEventId">
+                    <input type="text" id="editEventTitle" placeholder="Event Title" required>
+                    <input type="date" id="editEventDate" required>
+                    
+                    <div class="custom-time-input">
+                        <select id="edit-event-time-hour" class="time-select">
+                            <option value="">--</option>
+                            <option value="00">00</option>
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="17">17</option>
+                            <option value="18">18</option>
+                            <option value="19">19</option>
+                            <option value="20">20</option>
+                            <option value="21">21</option>
+                            <option value="22">22</option>
+                            <option value="23">23</option>
+                        </select>
+                        <span class="time-separator">:</span>
+                        <select id="edit-event-time-minute" class="time-select">
+                            <option value="">--</option>
+                            <option value="00">00</option>
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                            <option value="45">45</option>
+                        </select>
+                    </div>
+                    
+                    <textarea id="editEventDescription" placeholder="Event Description"></textarea>
+                    
+                    <div class="edit-form-actions">
+                        <button type="button" class="btn btn-delete-confirm" onclick="deleteEvent()">Delete Event</button>
+                        <button type="button" class="btn btn-cancel" onclick="hideEditEventModal()">Cancel</button>
+                        <button type="submit" class="btn btn-save">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
+
+    <script src="script.js"></script>
+</body>
+</html>

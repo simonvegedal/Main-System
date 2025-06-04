@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Mail Outreach System</title>
+    <link rel="stylesheet" href="MAIL_SYSTEM.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 CRM Mail Outreach</h1>
+            <p>Hold styr på jeres mail-kampagner og kundeinteraktioner</p>
+        </div>
+
+        <div class="controls">
+            <div class="stats">
+                <div class="stat-card total">
+                    <div class="stat-number" id="totalCount">0</div>
+                    <div class="stat-label">Total kontakter</div>
+                </div>
+                <div class="stat-card waiting">
+                    <div class="stat-number" id="waitingCount">0</div>
+                    <div class="stat-label">Venter på svar</div>
+                </div>
+                <div class="stat-card interested">
+                    <div class="stat-number" id="interestedCount">0</div>
+                    <div class="stat-label">Interesserede</div>
+                </div>
+                <div class="stat-card not-interested">
+                    <div class="stat-number" id="notInterestedCount">0</div>
+                    <div class="stat-label">Ikke interesseret</div>
+                </div>
+                <div class="stat-card booked">
+                    <div class="stat-number" id="bookedCount">0</div>
+                    <div class="stat-label">Booket møde</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <label for="virksomhed">Virksomhedsnavn</label>
+                    <input type="text" id="virksomhed" placeholder="Indtast virksomhedsnavn">
+                </div>
+                <div class="input-group">
+                    <label for="kontaktperson">Kontaktperson</label>
+                    <input type="text" id="kontaktperson" placeholder="Indtast kontaktperson">
+                </div>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Indtast email">
+                </div>
+                <div class="input-group">
+                    <label for="status">Status</label>
+                    <select id="status">
+                        <option value="Venter på svar">Venter på svar</option>
+                        <option value="Interesseret">Interesseret</option>
+                        <option value="Ikke interesseret">Ikke interesseret</option>
+                        <option value="Booket møde">Booket møde</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <label for="naesteDato">Næste dato</label>
+                    <input type="date" id="naesteDato">
+                </div>
+                <div class="input-group">
+                    <label for="kommentar">Kommentar</label>
+                    <textarea id="kommentar" placeholder="Evt. kommentarer" rows="2"></textarea>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="addContact()">➕ Tilføj kontakt</button>
+
+            <div class="filters">
+                <label>Filter:</label>
+                <select id="statusFilter" onchange="filterContacts()">
+                    <option value="">Alle statuser</option>
+                    <option value="Venter på svar">Venter på svar</option>
+                    <option value="Interesseret">Interesseret</option>
+                    <option value="Ikke interesseret">Ikke interesseret</option>
+                    <option value="Booket møde">Booket møde</option>
+                </select>
+                <button class="btn btn-warning btn-small" onclick="showDueToday()">📅 Forfaldne i dag</button>
+                <button class="btn btn-success btn-small" onclick="exportData()">📊 Eksporter data</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="loading" id="loading">Indlæser data...</div>
+            <table id="contactsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Virksomhed</th>
+                        <th>Kontaktperson</th>
+                        <th>Email</th>
+                        <th>Mail 1</th>
+                        <th>Mail 2</th>
+                        <th>Mail 3</th>
+                        <th>Status</th>
+                        <th>Næste dato</th>
+                        <th>Kommentar</th>
+                        <th>Handlinger</th>
+                    </tr>
+                </thead>
+                <tbody id="contactsBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal for redigering -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Rediger kontakt</h2>
+            <div class="form-group">
+                <div class="input-group">
+                    <label for="editVirksomhed">Virksomhedsnavn</label>
+                    <input type="text" id="editVirksomhed">
+                </div>
+                <div class="input-group">
+                    <label for="editKontaktperson">Kontaktperson</label>
+                    <input type="text" id="editKontaktperson">
+                </div>
+                <div class="input-group">
+                    <label for="editEmail">Email</label>
+                    <input type="email" id="editEmail">
+                </div>
+                <div class="input-group">
+                    <label for="editStatus">Status</label>
+                    <select id="editStatus">
+                        <option value="Venter på svar">Venter på svar</option>
+                        <option value="Interesseret">Interesseret</option>
+                        <option value="Ikke interesseret">Ikke interesseret</option>
+                        <option value="Booket møde">Booket møde</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="editNaesteDato">Næste dato</label>
+                    <input type="date" id="editNaesteDato">
+                </div>
+                <div class="input-group">
+                    <label for="editKommentar">Kommentar</label>
+                    <textarea id="editKommentar" rows="3"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Mail status</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <label><input type="checkbox" id="editMail1"> Mail 1</label>
+                        <label><input type="checkbox" id="editMail2"> Mail 2</label>
+                        <label><input type="checkbox" id="editMail3"> Mail 3</label>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="saveEdit()">💾 Gem ændringer</button>
+                <button class="btn btn-danger" onclick="closeModal()">❌ Annuller</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="MAIL_SYSTEM.js" type="module"></script>
+</body>
+</html>
